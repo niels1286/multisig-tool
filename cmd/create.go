@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/niels1286/multisig-tool/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var m int
@@ -20,13 +19,14 @@ var createCmd = &cobra.Command{
 			fmt.Println("m value valid")
 			return
 		}
-		pkArray := strings.Split(pks, ",")
-		if len(pkArray) < m {
-			fmt.Println("Incorrect public keys")
+
+		sdk := utils.GetOfficalSdk()
+		msAccount, err := sdk.MultiAccountSDK.CreateMultiAccount(m, pks)
+		if err != nil {
+			fmt.Println(err)
 			return
 		}
-		address := utils.CreateAddress(m, pkArray)
-		fmt.Println("Operation Successed.\naddress:", address)
+		fmt.Println("Operation Successed.\naddress:", msAccount.Address)
 	},
 }
 
