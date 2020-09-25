@@ -3,12 +3,11 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/niels1286/multisig-tool/cfg"
 	"github.com/niels1286/multisig-tool/utils"
-	"github.com/niels1286/nerve-go-sdk/account"
-	txprotocal "github.com/niels1286/nerve-go-sdk/tx/protocal"
-	"github.com/niels1286/nerve-go-sdk/tx/txdata"
+	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
+	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var alias string
@@ -23,18 +22,15 @@ var aliasCmd = &cobra.Command{
 
 		amount = 1
 		to = cfg.BlackHoleAddress
-		pkArray := strings.Split(pks, ",")
-		if len(pkArray) < m {
-			fmt.Println("Incorrect public keys")
-			return
-		}
-		tx := utils.AssembleTransferTx(m, pkArray, amount, "", to, 0, 0, nil)
+		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, amount, "", to, 0, 0, nil)
 		if tx == nil {
 			return
 		}
 		tx.TxType = txprotocal.TX_TYPE_ACCOUNT_ALIAS
+		sdk := utils.GetOfficalSdk()
+		msAccount, _ := sdk.MultiAccountSDK.CreateMultiAccount(m, pks)
 		aliasData := txdata.Alias{
-			Address: account.AddressStrToBytes(utils.CreateAddress(m, pkArray)),
+			Address: msAccount.AddressBytes,
 			Alias:   alias,
 		}
 		var err error

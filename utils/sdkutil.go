@@ -6,6 +6,7 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/niels1286/multisig-tool/cfg"
 	"github.com/niels1286/nerve-go-sdk/multisig"
 	"github.com/niels1286/nerve-go-sdk/nerve"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
@@ -14,13 +15,8 @@ import (
 	"time"
 )
 
-const apiUrl = "http://beta.api.nerve.network"
-const chainId = 5
-const mainAssetsId = 1
-const addressPrefix = "TNVT"
-
 func GetOfficalSdk() *nerve.NerveSDK {
-	return nerve.GetSDK(apiUrl, chainId, addressPrefix)
+	return nerve.GetSDK(cfg.ApiUrl, cfg.MainChainId, cfg.AddressPrefix)
 }
 
 func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId uint16, amount float64, remark string, to string, fromLocked byte, toLockValue uint64, nonce []byte) *txprotocal.Transaction {
@@ -87,7 +83,7 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 		Tos:   nil,
 	}
 
-	if chainId == assetsChainId && assetsId == mainAssetsId {
+	if cfg.MainChainId == assetsChainId && assetsId == cfg.MainAssetsId {
 
 		if nonce == nil {
 			nonce = GetNonce(msAccount.Address, assetsChainId, assetsId)
@@ -112,7 +108,7 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 
 		if nonce == nil {
 			nonce = GetNonce(msAccount.Address, assetsChainId, assetsId)
-			mainNonce = GetNonce(msAccount.Address, chainId, mainAssetsId)
+			mainNonce = GetNonce(msAccount.Address, cfg.MainChainId, cfg.MainAssetsId)
 		} else {
 			mainNonce = nonce
 		}
@@ -137,8 +133,8 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 		from2 := txprotocal.CoinFrom{
 			Coin: txprotocal.Coin{
 				Address:       msAccount.AddressBytes,
-				AssetsChainId: chainId,
-				AssetsId:      mainAssetsId,
+				AssetsChainId: cfg.MainChainId,
+				AssetsId:      cfg.MainAssetsId,
 				Amount:        fromVal,
 			},
 			Nonce:  mainNonce,
