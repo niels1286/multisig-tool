@@ -102,6 +102,8 @@ github.com/niels1286/nerve-go-sdk v0.0.0-20200923060113-68124579d59d h1:BJyqaCfe
 github.com/niels1286/nerve-go-sdk v0.0.0-20200923060113-68124579d59d/go.mod h1:ooVXDrOG1iTxn2EuFDKySTo7TAFrp8J6iHCo1Z04/Wo=
 github.com/niels1286/nerve-go-sdk v0.0.0-20200923063427-cc662f88031f h1:XaXUDmc1zgi5u9W4OSQbHw6K3xvfdSvKTMFIbeDJZsw=
 github.com/niels1286/nerve-go-sdk v0.0.0-20200923063427-cc662f88031f/go.mod h1:ooVXDrOG1iTxn2EuFDKySTo7TAFrp8J6iHCo1Z04/Wo=
+github.com/niels1286/nerve-go-sdk v0.0.0-20200925083919-5a3e21291055 h1:2hRO9VZN3ypCaun07+Mt9ycG68r8c7HmVSjBY+3vUk4=
+github.com/niels1286/nerve-go-sdk v0.0.0-20200925083919-5a3e21291055/go.mod h1:ooVXDrOG1iTxn2EuFDKySTo7TAFrp8J6iHCo1Z04/Wo=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
