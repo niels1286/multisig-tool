@@ -52,7 +52,7 @@ var withdrawCmd = &cobra.Command{
 		depositData := txdata.Staking{}
 		depositData.Parse(seria.NewByteBufReader(txDataBytes, 0))
 		value := depositData.Amount.Div(depositData.Amount, big.NewInt(100000000))
-		amount = float64(value.Uint64()) - 0.001
+		amount = float64(value.Uint64())
 
 		msAccount, err := sdk.CreateMultiAccount(m, pks)
 		if err != nil {
