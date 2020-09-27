@@ -69,6 +69,6 @@ func init() {
 	transferCmd.MarkFlagRequired("amount")
 	transferCmd.Flags().StringVarP(&remark, "remark", "r", "", "交易备注，可以为空")
 
-	transferCmd.Flags().StringVarP(&assets, "assets", "", "9-1", "资产标识,格式为chainId-assetsId，NVT:9-1,NULS:1-1")
+	transferCmd.Flags().StringVarP(&assets, "assets", "", "", "资产标识,格式为chainId-assetsId，NVT:9-1,NULS:1-1")
 
 }
