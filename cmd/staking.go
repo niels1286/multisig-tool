@@ -51,7 +51,7 @@ var depositCmd = &cobra.Command{
 			aId = uint16(val2)
 		}
 
-		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, "", msAccount.Address, 0, cfg.POCLockValue, nil)
+		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, "", msAccount.Address, 0, cfg.POCLockValue, nil, false)
 		if tx == nil {
 			fmt.Println("Failed!")
 			return

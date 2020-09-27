@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/mitchellh/go-homedir"
-	"github.com/niels1286/multisig-tool/cfg"
 	"github.com/niels1286/multisig-tool/utils"
-	"github.com/niels1286/nerve-go-sdk/account"
-	txprotocal "github.com/niels1286/nerve-go-sdk/tx/protocal"
+	"github.com/niels1286/nerve-go-sdk/acc"
+	cryptoutils "github.com/niels1286/nerve-go-sdk/crypto/utils"
+	"github.com/niels1286/nerve-go-sdk/nerve"
+	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/utils/seria"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +35,9 @@ var signtxCmd = &cobra.Command{
 			fmt.Println("need prikey")
 			return
 		}
-		nulsAccount, err := getAccount()
+		sdk := utils.GetOfficalSdk()
+
+		nulsAccount, err := getAccount(sdk)
 
 		if err != nil {
 			fmt.Println("account wrong.")
@@ -52,8 +56,8 @@ var signtxCmd = &cobra.Command{
 		txSign.Parse(seria.NewByteBufReader(tx.SignData, 0))
 		ok := false
 		for _, pk := range txSign.PubkeyList {
-			address := account.GetAddressByPubBytes(pk, cfg.DefaultChainId, account.NormalAccountType, cfg.DefaultAddressPrefix)
-			if reflect.DeepEqual(address, nulsAccount.AddressBytes) {
+			address := sdk.GetAddressByPubBytes(pk, 1)
+			if reflect.DeepEqual(address, nulsAccount.GetAddrBytes()) {
 				ok = true
 				break
 			}
@@ -68,14 +72,14 @@ var signtxCmd = &cobra.Command{
 			fmt.Println("txhex wrong.")
 			return
 		}
-		signData, err := nulsAccount.Sign(hash)
+		signData, err := sdk.AccountSDK.Sign(nulsAccount, hash)
 		if err != nil {
 			fmt.Println("sign failed.")
 			return
 		}
 		sign := txprotocal.P2PHKSignature{
 			SignValue: signData,
-			PublicKey: nulsAccount.GetPubKeyBytes(true),
+			PublicKey: nulsAccount.GetPubKey(),
 		}
 		txSign.Signatures = append(txSign.Signatures, sign)
 		tx.SignData, err = txSign.Serialize()
@@ -92,7 +96,7 @@ var signtxCmd = &cobra.Command{
 		if byte(len(txSign.Signatures)) >= txSign.M {
 			sdk := utils.GetOfficalSdk()
 
-			hash, err := sdk.BroadcastTx(resultBytes)
+			hash, err := sdk.Broadcast(hex.EncodeToString(resultBytes))
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -105,21 +109,23 @@ var signtxCmd = &cobra.Command{
 	},
 }
 
-func getAccount() (*account.Account, error) {
-	if "" != prikeyHex {
-		nulsAccount, err := account.GetAccountFromPrkey(prikeyHex, cfg.DefaultChainId, cfg.DefaultAddressPrefix)
+func getAccount(sdk *nerve.NerveSDK) (acc.Account, error) {
+	var prikey []byte
+	if "" == prikeyHex {
+		encryptedPrivateKey := viper.GetString("encryptedPrivateKey")
+		data, err := hex.DecodeString(encryptedPrivateKey)
 		if err != nil {
 			return nil, err
 		}
-		return nulsAccount, nil
+		err = errors.New("password may be wrong!")
+		pwd := cryptoutils.Sha256h([]byte(password))
+		prikey = cryptoutils.AESDecrypt(data, pwd)
+
 	} else {
-		ks := account.KeyStore{
-			Address:             viper.GetString("address"),
-			EncryptedPrivateKey: viper.GetString("encryptedPrivateKey"),
-			Pubkey:              viper.GetString("pubkey"),
-		}
-		return ks.GetAccount(password, cfg.DefaultChainId, cfg.DefaultAddressPrefix)
+		prikey, _ = hex.DecodeString(prikeyHex)
 	}
+	nulsAccount, err := sdk.ImportAccount(prikey)
+	return nulsAccount, err
 }
 
 func init() {

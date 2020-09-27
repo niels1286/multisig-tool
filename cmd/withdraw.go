@@ -4,14 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/niels1286/multisig-tool/cfg"
 	"github.com/niels1286/multisig-tool/utils"
-	txprotocal "github.com/niels1286/nerve-go-sdk/tx/protocal"
-	"github.com/niels1286/nerve-go-sdk/tx/txdata"
+	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
+	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
 	"github.com/niels1286/nerve-go-sdk/utils/seria"
-	"math/big"
-	"strings"
-
 	"github.com/spf13/cobra"
+	"math/big"
+	"time"
 )
 
 var depositTxHash string
@@ -29,7 +29,9 @@ var withdrawCmd = &cobra.Command{
 		}
 		ahash := txprotocal.NewNulsHash(hashBytes)
 
-		txJson, err := utils.GetOfficalSdk().GetTxJson(ahash)
+		sdk := utils.GetOfficalSdk()
+
+		txJson, err := sdk.GetTxJson(depositTxHash)
 		if err != nil {
 			fmt.Println("Can't find the deposit transaction.")
 			return
@@ -47,24 +49,28 @@ var withdrawCmd = &cobra.Command{
 			fmt.Println("Failed to parse the deposit transaction.")
 			return
 		}
-		depositData := txdata.Deposit{}
+		depositData := txdata.Staking{}
 		depositData.Parse(seria.NewByteBufReader(txDataBytes, 0))
 		value := depositData.Amount.Div(depositData.Amount, big.NewInt(100000000))
 		amount = float64(value.Uint64()) - 0.001
-		pkArray := strings.Split(pks, ",")
-		if len(pkArray) < m {
-			fmt.Println("Incorrect public keys")
+
+		msAccount, err := sdk.CreateMultiAccount(m, pks)
+		if err != nil {
+			fmt.Println(err.Error())
 			return
 		}
-		address := utils.CreateAddress(m, pkArray)
 
-		tx := utils.AssembleTransferTx(m, pkArray, amount, "", address, 255, 0, hashBytes[24:])
+		toLockValue := uint64(0)
+		if cfg.MainChainId == depositData.AssetsChainId && cfg.MainAssetsId == depositData.AssetsId {
+			toLockValue = uint64(time.Now().Unix() + 7*24*3600)
+		}
+		tx := utils.AssembleTransferTx(m, pks, depositData.AssetsChainId, depositData.AssetsId, amount, "", msAccount.Address, cfg.POCLockValue, toLockValue, hashBytes[24:], true)
 		if tx == nil {
 			return
 		}
 		tx.TxType = txprotocal.TX_TYPE_CANCEL_DEPOSIT
 
-		withdrawData := txdata.Withdraw{DepositTxHash: ahash}
+		withdrawData := txdata.Withdraw{StakingTxHash: ahash}
 
 		tx.Extend, err = withdrawData.Serialize()
 		if err != nil {

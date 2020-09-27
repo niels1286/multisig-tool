@@ -22,7 +22,7 @@ var aliasCmd = &cobra.Command{
 
 		amount = 1
 		to = cfg.BlackHoleAddress
-		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, amount, "", to, 0, 0, nil)
+		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, amount, "", to, 0, 0, nil, false)
 		if tx == nil {
 			return
 		}

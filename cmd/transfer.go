@@ -3,8 +3,10 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/niels1286/multisig-tool/cfg"
 	"github.com/niels1286/multisig-tool/utils"
 	"github.com/spf13/cobra"
+	"strconv"
 	"strings"
 )
 
@@ -19,13 +21,25 @@ var transferCmd = &cobra.Command{
 	Short: "Assemble a transfer transaction",
 	Long:  `根据参数组装一个转账交易，并返回交易hex`,
 	Run: func(cmd *cobra.Command, args []string) {
-		pkArray := strings.Split(pks, ",")
-		if len(pkArray) < m {
-			fmt.Println("Incorrect public keys")
-			return
-		}
+		cId := cfg.MainChainId
+		aId := cfg.MainAssetsId
 
-		tx := utils.AssembleTransferTx(m, pkArray, amount, remark, to, 0, 0, nil)
+		if "" != assets {
+			arr := strings.Split(assets, "-")
+			val, err := strconv.Atoi(arr[0])
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			cId = uint16(val)
+			val2, err := strconv.Atoi(arr[1])
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			aId = uint16(val2)
+		}
+		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, remark, to, 0, 0, nil)
 		if tx == nil {
 			return
 		}

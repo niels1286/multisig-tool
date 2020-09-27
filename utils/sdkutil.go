@@ -19,7 +19,7 @@ func GetOfficalSdk() *nerve.NerveSDK {
 	return nerve.GetSDK(cfg.ApiUrl, cfg.MainChainId, cfg.AddressPrefix)
 }
 
-func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId uint16, amount float64, remark string, to string, fromLocked byte, toLockValue uint64, nonce []byte) *txprotocal.Transaction {
+func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId uint16, amount float64, remark string, to string, fromLocked byte, toLockValue uint64, nonce []byte, needFeeNonce bool) *txprotocal.Transaction {
 	tx := txprotocal.Transaction{
 		TxType:   txprotocal.TX_TYPE_TRANSFER,
 		Time:     uint32(time.Now().Unix()),
@@ -44,7 +44,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 		return nil
 	}
 
-	fillCoinData(tx, sdk, msAccount, fromLocked, to, toLockValue, amount, assetsChainId, assetsId, nonce)
+	fillCoinData(tx, sdk, msAccount, fromLocked, to, toLockValue, amount, assetsChainId, assetsId, nonce, needFeeNonce)
 
 	pkArray := strings.Split(pkArrayHex, ",")
 	publicKeys := [][]byte{}
@@ -71,7 +71,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 	return &tx
 }
 
-func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLocked byte, to string, toLockValue uint64, amount float64, assetsChainId uint16, assetsId uint16, nonce []byte) {
+func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLocked byte, to string, toLockValue uint64, amount float64, assetsChainId uint16, assetsId uint16, nonce []byte, feeNonce bool) {
 	value := big.NewFloat(amount)
 	value = value.Mul(value, big.NewFloat(100000000))
 	x, _ := value.Uint64()
@@ -108,6 +108,8 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 
 		if nonce == nil {
 			nonce = GetNonce(msAccount.Address, assetsChainId, assetsId)
+			mainNonce = GetNonce(msAccount.Address, cfg.MainChainId, cfg.MainAssetsId)
+		} else if feeNonce {
 			mainNonce = GetNonce(msAccount.Address, cfg.MainChainId, cfg.MainAssetsId)
 		} else {
 			mainNonce = nonce
