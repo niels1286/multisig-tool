@@ -3,10 +3,9 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/niels1286/multisig-tool/cfg"
-	"github.com/niels1286/nerve-go-sdk/account"
-	txprotocal "github.com/niels1286/nerve-go-sdk/tx/protocal"
-	"github.com/niels1286/nerve-go-sdk/tx/txdata"
+	"github.com/niels1286/multisig-tool/utils"
+	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
+	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
 	"github.com/niels1286/nerve-go-sdk/utils/mathutils"
 	"github.com/niels1286/nerve-go-sdk/utils/seria"
 	"github.com/spf13/cobra"
@@ -25,9 +24,9 @@ type TxInfo struct {
 var TypeMap = map[uint16]string{
 	1:                                 "共识奖励",
 	2:                                 "转账交易",
-	5:                                 "委托交易",
+	5:                                 "质押交易",
 	txprotocal.TX_TYPE_ACCOUNT_ALIAS:  "设置别名",
-	txprotocal.TX_TYPE_CANCEL_DEPOSIT: "退出委托",
+	txprotocal.TX_TYPE_CANCEL_DEPOSIT: "退出Staking",
 	txprotocal.TX_TYPE_STOP_AGENT:     "停止节点",
 	txprotocal.TX_TYPE_REGISTER_AGENT: "创建节点",
 }
@@ -62,37 +61,44 @@ var parsetxCmd = &cobra.Command{
 		fmt.Println(info.String())
 	},
 }
+var timeStrArr = []string{"3月", "半年", "一年", "两年", "三年", "五年", "十年"}
 
 func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 	typeStr := TypeMap[tx.TxType]
 	txData := map[string]string{}
+	sdk := utils.GetOfficalSdk()
 	switch tx.TxType {
 	case txprotocal.TX_TYPE_DEPOSIT:
-		deposit := &txdata.Deposit{}
+		deposit := &txdata.Staking{}
 		deposit.Parse(seria.NewByteBufReader(tx.Extend, 0))
-		txData["address"] = account.GetStringAddress(deposit.Address, cfg.DefaultAddressPrefix)
-		txData["agentHash"] = deposit.AgentHash.String()
+		txData["address"] = sdk.GetStringAddress(deposit.Address)
 		txData["amount"] = fmt.Sprintf("%d", deposit.Amount.Uint64()/100000000)
+		timeStr := "活期"
+		if deposit.DepositType != 0 {
+			timeStr = timeStrArr[deposit.TimeType]
+		}
+		txData["time"] = timeStr
 	case txprotocal.TX_TYPE_REGISTER_AGENT:
-		agent := &txdata.Agent{}
+		agent := &txdata.CreateNode{}
 		agent.Parse(seria.NewByteBufReader(tx.Extend, 0))
-		txData["agentAddress"] = account.GetStringAddress(agent.AgentAddress, cfg.DefaultAddressPrefix)
-		txData["packingAddress"] = account.GetStringAddress(agent.PackingAddress, cfg.DefaultAddressPrefix)
-		txData["rewardAddress"] = account.GetStringAddress(agent.RewardAddress, cfg.DefaultAddressPrefix)
+		txData["createAddress"] = sdk.GetStringAddress(agent.AgentAddress)
+		txData["packingAddress"] = sdk.GetStringAddress(agent.PackingAddress)
+		txData["rewardAddress"] = sdk.GetStringAddress(agent.RewardAddress)
 		txData["amount"] = fmt.Sprintf("%d", agent.Amount.Uint64()/100000000)
-		txData["commissionRate"] = fmt.Sprintf("%d", agent.CommissionRate)
 	case txprotocal.TX_TYPE_STOP_AGENT:
-		info := &txdata.StopAgent{}
+		info := &txdata.StopNode{}
 		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
-		txData["agentHash"] = info.AgentHash.String()
+		txData["address"] = sdk.GetStringAddress(info.Address)
+		txData["nodeHash"] = info.AgentHash.String()
 	case txprotocal.TX_TYPE_CANCEL_DEPOSIT:
 		info := txdata.Withdraw{}
 		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
-		txData["depositTxHash"] = info.DepositTxHash.String()
+		txData["address"] = sdk.GetStringAddress(info.Address)
+		txData["stakingTxHash"] = info.StakingTxHash.String()
 	case txprotocal.TX_TYPE_ACCOUNT_ALIAS:
 		info := &txdata.Alias{}
 		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
-		txData["address"] = account.GetStringAddress(info.Address, cfg.DefaultAddressPrefix)
+		txData["address"] = sdk.GetStringAddress(info.Address)
 		txData["alias"] = info.Alias
 	default:
 		if tx.Extend != nil {
@@ -104,7 +110,7 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 	var message = "From:\n"
 	for _, from := range cd.Froms {
 		nonce := hex.EncodeToString(from.Nonce)
-		message += "\t" + account.GetStringAddress(from.Address, cfg.DefaultAddressPrefix) + "(" + fmt.Sprintf("%d", from.AssetsChainId) + "-" + fmt.Sprintf("%d", from.AssetsId) + ") (" + nonce + "):: " + mathutils.GetStringAmount(from.Amount, 8) + "\n"
+		message += "\t" + sdk.GetStringAddress(from.Address) + "(" + fmt.Sprintf("%d", from.AssetsChainId) + "-" + fmt.Sprintf("%d", from.AssetsId) + ") (" + nonce + "):: " + mathutils.GetStringAmount(from.Amount, 8) + "\n"
 	}
 	message += "To:\n"
 	for _, to := range cd.Tos {
@@ -112,7 +118,7 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 		if to.LockValue == uint64(18446744073709551615) {
 			lock = "-1"
 		}
-		message += "\t" + account.GetStringAddress(to.Address, cfg.DefaultAddressPrefix) + "(" + fmt.Sprintf("%d", to.AssetsChainId) + "-" + fmt.Sprintf("%d", to.AssetsId) + ") :: " + mathutils.GetStringAmount(to.Amount, 8) + " (lock:" + lock + ")\n"
+		message += "\t" + sdk.GetStringAddress(to.Address) + "(" + fmt.Sprintf("%d", to.AssetsChainId) + "-" + fmt.Sprintf("%d", to.AssetsId) + ") :: " + mathutils.GetStringAmount(to.Amount, 8) + " (lock:" + lock + ")\n"
 	}
 
 	return &TxInfo{
