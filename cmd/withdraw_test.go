@@ -24,6 +24,6 @@ func TestDWithdraw(t *testing.T) {
 
 	m = 2
 	pks = a.GetPubKeyHex() + "," + b.GetPubKeyHex() + "," + c.GetPubKeyHex()
-	depositTxHash = "3d95009d2b62b7ba9460c0f6ab44a487907f69db077617dc11ee0c9df4f8f029"
+	stakingTxHash = "3d95009d2b62b7ba9460c0f6ab44a487907f69db077617dc11ee0c9df4f8f029"
 	withdrawCmd.Run(nil, nil)
 }

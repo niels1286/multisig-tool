@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"github.com/niels1286/multisig-tool/utils"
 	"github.com/niels1286/nerve-go-sdk/acc"
 	cryptoutils "github.com/niels1286/nerve-go-sdk/crypto/utils"
@@ -13,7 +12,6 @@ import (
 	"github.com/niels1286/nerve-go-sdk/utils/seria"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 	"reflect"
 )
 
@@ -101,7 +99,7 @@ var signtxCmd = &cobra.Command{
 				fmt.Println(err.Error())
 				return
 			} else {
-				fmt.Println("Success!\ntx hash : " + hash)
+				fmt.Println("Broadcast Success!\ntx hash : " + hash)
 			}
 		}
 		resultHex := hex.EncodeToString(resultBytes)
@@ -144,21 +142,12 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if keystore != "" {
-		// Use config file from the flag.
-		viper.SetConfigType("json")
-		viper.SetConfigFile(keystore)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		// Search config in home directory with name ".nmt" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName("json")
+	if keystore == "" {
+		return
 	}
+	// Use config file from the flag.
+	viper.SetConfigType("json")
+	viper.SetConfigFile(keystore)
 
 	viper.AutomaticEnv() // read in environment variables that match
 

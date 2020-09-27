@@ -15,4 +15,4 @@ const BlackHoleAddress = "TNVTdTSPGwjgRMtHqjmg8yKeMLnpBpVN5ZuuY"
 //const AddressPrefix = "NERVE"
 //const BlackHoleAddress = "NERVEepb63T1M8JgQ26jwZpZXYL8ZMLdUAK31L"
 
-const POCLockValue = 255
+const POCLockValue = 18446744073709551615

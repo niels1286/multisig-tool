@@ -24,7 +24,8 @@ func TestDeposit(t *testing.T) {
 
 	m = 2
 	pks = a.GetPubKeyHex() + "," + b.GetPubKeyHex() + "," + c.GetPubKeyHex()
-	amount = 2001
+	amount = 1001
+	assets = "5-1"
 	timeType = 0
 
 	depositCmd.Run(nil, nil)
