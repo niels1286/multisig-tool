@@ -39,7 +39,7 @@ var transferCmd = &cobra.Command{
 			}
 			aId = uint16(val2)
 		}
-		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, remark, to, 0, 0, nil)
+		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, remark, to, 0, 0, nil, false)
 		if tx == nil {
 			return
 		}
