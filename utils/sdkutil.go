@@ -44,7 +44,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 		return nil
 	}
 
-	fillCoinData(tx, sdk, msAccount, fromLocked, to, toLockValue, amount, assetsChainId, assetsId, nonce, needFeeNonce)
+	tx.CoinData = fillCoinData(sdk, msAccount, fromLocked, to, toLockValue, amount, assetsChainId, assetsId, nonce, needFeeNonce)
 
 	pkArray := strings.Split(pkArrayHex, ",")
 	publicKeys := [][]byte{}
@@ -71,7 +71,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 	return &tx
 }
 
-func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLocked byte, to string, toLockValue uint64, amount float64, assetsChainId uint16, assetsId uint16, nonce []byte, feeNonce bool) {
+func fillCoinData(sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLocked byte, to string, toLockValue uint64, amount float64, assetsChainId uint16, assetsId uint16, nonce []byte, feeNonce bool) []byte {
 	value := big.NewFloat(amount)
 	value = value.Mul(value, big.NewFloat(100000000))
 	x, _ := value.Uint64()
@@ -147,7 +147,7 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 	toAddress, err2 := sdk.AccountSDK.GetBytesAddress(to)
 	if nil != err2 {
 		fmt.Println(err2.Error())
-		return
+		return nil
 	}
 	to1 := txprotocal.CoinTo{
 		Coin: txprotocal.Coin{
@@ -160,11 +160,9 @@ func fillCoinData(tx txprotocal.Transaction, sdk *nerve.NerveSDK, msAccount *mul
 	}
 	coinData.Tos = []txprotocal.CoinTo{to1}
 
-	var err error
-	tx.CoinData, err = coinData.Serialize()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	result, _ := coinData.Serialize()
+
+	return result
 }
 
 func GetNonce(address string, chainId uint16, assetsId uint16) []byte {

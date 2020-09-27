@@ -100,8 +100,9 @@ var signtxCmd = &cobra.Command{
 			if err != nil {
 				fmt.Println(err.Error())
 				return
+			} else {
+				fmt.Println("Success!\ntx hash : " + hash)
 			}
-			fmt.Println("Success!\ntx hash : " + hash)
 		}
 		resultHex := hex.EncodeToString(resultBytes)
 
