@@ -27,7 +27,4 @@ func TestIt(t *testing.T) {
 	fmt.Println(pks)
 	createCmd.Run(nil, nil)
 
-	if "tNULSeBaNSoW8MSmEuEWpQkLNqmfnjNCfsXHg1" != "tNULSeBaNSoW8MSmEuEWpQkLNqmfnjNCfsXHg1" {
-		t.Errorf("一次性测试")
-	}
 }
