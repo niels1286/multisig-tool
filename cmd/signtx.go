@@ -100,6 +100,7 @@ var signtxCmd = &cobra.Command{
 				return
 			} else {
 				fmt.Println("Broadcast Success!\ntx hash : " + hash)
+				return
 			}
 		}
 		resultHex := hex.EncodeToString(resultBytes)
