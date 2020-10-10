@@ -10,6 +10,7 @@ import (
 	"github.com/niels1286/nerve-go-sdk/multisig"
 	"github.com/niels1286/nerve-go-sdk/nerve"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
+	"github.com/shopspring/decimal"
 	"math/big"
 	"strings"
 	"time"
@@ -72,11 +73,11 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 }
 
 func fillCoinData(sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLocked byte, to string, toLockValue uint64, amount float64, assetsChainId uint16, assetsId uint16, nonce []byte, feeNonce bool) []byte {
-	value := big.NewFloat(amount)
-	value = value.Mul(value, big.NewFloat(100000000))
-	x, _ := value.Uint64()
-	val := new(big.Int)
-	val.SetUint64(x)
+
+	value := decimal.NewFromFloat(amount)
+	value = value.Mul(decimal.NewFromFloat(100000000))
+
+	val := value.BigInt()
 
 	coinData := &txprotocal.CoinData{
 		Froms: nil,
