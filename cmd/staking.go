@@ -23,6 +23,7 @@ var depositCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if amount < 1000 || amount > 100000000 {
 			fmt.Println("staking金额不正确")
+			return
 		}
 
 		sdk := utils.GetOfficalSdk()
@@ -104,6 +105,6 @@ func init() {
 	depositCmd.Flags().Float64VarP(&amount, "amount", "a", 0, "委托金额")
 	depositCmd.MarkFlagRequired("amount")
 
-	depositCmd.Flags().StringVarP(&assets, "assets", "", "9-1", "资产标识,格式为chainId-assetsId，NVT:9-1,NULS:1-1")
-	depositCmd.Flags().Uint8VarP(&timeType, "timeType", "", 0, "质押时间类型：0-活期，1-3月，2-6月，3-1年，4-2年，5-3年，6-5年，7-10年")
+	depositCmd.Flags().StringVarP(&assets, "assets", "s", "9-1", "资产标识,格式为chainId-assetsId，NVT:9-1,NULS:1-1")
+	depositCmd.Flags().Uint8VarP(&timeType, "timeType", "t", 0, "质押时间类型：0-活期，1-3月，2-6月，3-1年，4-2年，5-3年，6-5年，7-10年")
 }
