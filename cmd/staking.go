@@ -23,6 +23,7 @@ var depositCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if amount < 1000 || amount > 100000000 {
 			fmt.Println("staking金额不正确")
+			return
 		}
 
 		sdk := utils.GetOfficalSdk()
