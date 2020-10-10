@@ -104,7 +104,7 @@ func init() {
 	createNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
 	createNodeCmd.MarkFlagRequired("publickeys")
 
-	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", "节点打包地址，改地址必须放在节点钱包中")
+	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", "节点打包地址，该地址必须放在节点钱包中")
 	createNodeCmd.MarkFlagRequired("packingAddress")
 
 	createNodeCmd.Flags().StringVarP(&rewardAddress, "rewardAddress", "r", "", "奖励地址，不填则默认为创建地址")
