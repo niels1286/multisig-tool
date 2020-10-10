@@ -37,7 +37,7 @@ var createNodeCmd = &cobra.Command{
 	Long:  `创建共识节点，参与网络维护`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if amount < 1000 || amount > 100000000 {
-			fmt.Println("staking金额不正确")
+			fmt.Println("保证金金额不正确")
 			return
 		}
 		sdk := utils.GetOfficalSdk()
