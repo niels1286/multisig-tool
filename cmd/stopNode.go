@@ -46,14 +46,19 @@ var stopNodeCmd = &cobra.Command{
 			fmt.Println(err.Error())
 			return
 		}
-		node, _ := sdk.GetNode(cfg.PsUrl, nodeHash)
+		node, err := sdk.GetNode(cfg.PsUrl, nodeHash)
+		if node == nil || err != nil {
+			fmt.Println("网络超时导致操作失败，请重试")
+			return
+		}
 		txTime := time.Now().Unix()
-		toLockTime := txTime + 7*24*3600
+		toLockTime := txTime + 15*24*3600
 
 		hash, _ := hex.DecodeString(nodeHash)
 
 		d := decimal.NewFromBigInt(node.Amount, -8)
 		realAmount, _ := d.Float64()
+		realAmount = realAmount - 0.001
 
 		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, realAmount, "", msAccount.Address, 255, uint64(toLockTime), hash[24:], false)
 		if tx == nil {
@@ -92,7 +97,7 @@ func init() {
 	stopNodeCmd.MarkFlagRequired("m")
 	stopNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
 	stopNodeCmd.MarkFlagRequired("publickeys")
-	stopNodeCmd.Flags().StringVarP(&nodeHash, "nodeHash", "a", "", "节点hash")
+	stopNodeCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
 	stopNodeCmd.MarkFlagRequired("nodeHash")
 
 }
