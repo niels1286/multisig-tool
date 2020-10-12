@@ -93,8 +93,8 @@ var signtxCmd = &cobra.Command{
 		////判断是否需要广播
 		if byte(len(txSign.Signatures)) >= txSign.M {
 			sdk := utils.GetOfficalSdk()
-
-			hash, err := sdk.Broadcast(hex.EncodeToString(resultBytes))
+			txHex := hex.EncodeToString(resultBytes)
+			hash, err := sdk.Broadcast(txHex)
 			if err != nil {
 				fmt.Println(err.Error())
 				return

@@ -181,3 +181,9 @@ func GetNonce(address string, chainId uint16, assetsId uint16) []byte {
 	}
 	return status.Nonce
 }
+
+func GetReduceNonceList(agentHash string, quitAll bool, reduceAmount float64) {
+	sdk := GetOfficalSdk()
+	fmt.Println(sdk.GetApiUrl())
+
+}
