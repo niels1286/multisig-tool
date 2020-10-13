@@ -24,8 +24,8 @@ import (
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
+	"math/big"
 	"strings"
-	"time"
 )
 
 var nodeHash string
@@ -51,22 +51,56 @@ var stopNodeCmd = &cobra.Command{
 			fmt.Println("网络超时导致操作失败，请重试")
 			return
 		}
-		txTime := time.Now().Unix()
-		toLockTime := txTime + 15*24*3600
-
-		hash, _ := hex.DecodeString(nodeHash)
-
-		d := decimal.NewFromBigInt(node.Amount, -8)
-		realAmount, _ := d.Float64()
-		realAmount = realAmount - 0.001
-
-		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, realAmount, "", msAccount.Address, 255, uint64(toLockTime), hash[24:], false)
+		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
 			fmt.Println("Failed!")
 			return
 		}
-		tx.TxType = txprotocal.TX_TYPE_STOP_AGENT
-		tx.Time = uint32(txTime)
+		tx.TxType = txprotocal.APPEND_AGENT_DEPOSIT
+
+		dec := decimal.NewFromFloat(amount)
+		dec = dec.Mul(decimal.New(1, 8))
+		x := dec.BigInt()
+
+		cId := cfg.MainChainId
+		aId := cfg.MainAssetsId
+
+		nonceList := utils.GetReduceNonceList(nodeHash, x)
+
+		totalFrom := big.NewInt(0)
+		froms := []txprotocal.CoinFrom{}
+		for _, item := range nonceList {
+			totalFrom = totalFrom.Add(totalFrom, item.Amount)
+			froms = append(froms, txprotocal.CoinFrom{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        item.Amount,
+				},
+				Nonce:  item.Nonce,
+				Locked: 255,
+			})
+		}
+
+		tos := []txprotocal.CoinTo{
+			{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        totalFrom.Sub(totalFrom, big.NewInt(100000)),
+				},
+				LockValue: uint64(tx.Time + uint32(15*24*3600)),
+			},
+		}
+
+		coinData := &txprotocal.CoinData{
+			Froms: froms,
+			Tos:   tos,
+		}
+		tx.CoinData, _ = coinData.Serialize()
+		hash, _ := hex.DecodeString(nodeHash)
 		txData := txdata.StopNode{
 			Address:   msAccount.AddressBytes,
 			AgentHash: txprotocal.NewNulsHash(hash),

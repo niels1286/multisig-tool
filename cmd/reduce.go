@@ -22,6 +22,7 @@ import (
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"math/big"
 	"strings"
@@ -45,18 +46,65 @@ var reduceCmd = &cobra.Command{
 
 		cId := cfg.MainChainId
 		aId := cfg.MainAssetsId
-		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, "", msAccount.Address, 0, cfg.POCLockValue, nil, true)
+		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
 			fmt.Println("Failed!")
 			return
 		}
 		tx.TxType = txprotocal.APPEND_AGENT_DEPOSIT
-		value := big.NewFloat(amount)
-		value = value.Mul(value, big.NewFloat(100000000))
-		x, _ := value.Uint64()
 
+		dec := decimal.NewFromFloat(amount)
+		dec = dec.Mul(decimal.New(1, 8))
+		x := dec.BigInt()
+
+		nonceList := utils.GetReduceNonceList(nodeHash, x)
+
+		totalFrom := big.NewInt(0)
+		froms := []txprotocal.CoinFrom{}
+		for _, item := range nonceList {
+			totalFrom = totalFrom.Add(totalFrom, item.Amount)
+			froms = append(froms, txprotocal.CoinFrom{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        item.Amount,
+				},
+				Nonce:  item.Nonce,
+				Locked: 255,
+			})
+		}
+
+		tos := []txprotocal.CoinTo{
+			{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        x.Sub(x, big.NewInt(100000)),
+				},
+				LockValue: uint64(tx.Time + uint32(15*24*3600)),
+			},
+		}
+		if totalFrom.Cmp(x) > 0 {
+			tos = append(tos, txprotocal.CoinTo{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        totalFrom.Sub(totalFrom, x),
+				},
+				LockValue: cfg.POCLockValue,
+			})
+		}
+
+		coinData := &txprotocal.CoinData{
+			Froms: froms,
+			Tos:   tos,
+		}
+		tx.CoinData, _ = coinData.Serialize()
 		depositData := txdata.ChangeNodeDeposit{
-			Amount:   big.NewInt(int64(x)),
+			Amount:   x,
 			Address:  msAccount.AddressBytes,
 			NodeHash: txprotocal.ImportNulsHash(nodeHash),
 		}
