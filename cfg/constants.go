@@ -10,7 +10,7 @@ const MainAssetsId = uint16(1)
 const AddressPrefix = "TNVT"
 const BlackHoleAddress = "TNVTdTSPGwjgRMtHqjmg8yKeMLnpBpVN5ZuuY"
 
-//const ApiUrl = "https://api.nerve.network/jsonrpc"
+//const ApiUrl = "https://api.nerve.network/jsonrpc/"
 //const PsUrl = "https://public.nerve.network/"
 //const MainChainId = uint16(9)
 //const MainAssetsId = uint16(1)
