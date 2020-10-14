@@ -36,8 +36,8 @@ var createNodeCmd = &cobra.Command{
 	Short: "创建节点",
 	Long:  `创建共识节点，参与网络维护`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if amount < 1000 || amount > 100000000 {
-			fmt.Println("staking金额不正确")
+		if amount < 2000 || amount > 100000000 {
+			fmt.Println("保证金金额不正确")
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -104,7 +104,7 @@ func init() {
 	createNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
 	createNodeCmd.MarkFlagRequired("publickeys")
 
-	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", "节点打包地址，改地址必须放在节点钱包中")
+	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", "节点打包地址，该地址必须放在节点钱包中")
 	createNodeCmd.MarkFlagRequired("packingAddress")
 
 	createNodeCmd.Flags().StringVarP(&rewardAddress, "rewardAddress", "r", "", "奖励地址，不填则默认为创建地址")

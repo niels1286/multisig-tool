@@ -22,21 +22,19 @@ import (
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"math/big"
 	"strings"
 )
 
-var nodeHash string
-
-// stopNodeCmd represents the stopNode command
-var stopNodeCmd = &cobra.Command{
-	Use:   "stopNode",
-	Short: "注销节点",
-	Long:  `注销节点，不再参与网络维护，不再得到奖励`,
+var reduceCmd = &cobra.Command{
+	Use:   "reduce",
+	Short: "减少",
+	Long:  `减少节点保证金`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if "" == strings.TrimSpace(nodeHash) {
-			fmt.Println("agent hash 不能为空")
+		if "" == nodeHash || strings.TrimSpace(nodeHash) == "" {
+			fmt.Println("节点hash不能为空")
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -45,22 +43,21 @@ var stopNodeCmd = &cobra.Command{
 			fmt.Println(err.Error())
 			return
 		}
-		node, err := sdk.GetNode(cfg.PsUrl, nodeHash)
-		if node == nil || err != nil {
-			fmt.Println("网络超时导致操作失败，请重试")
-			return
-		}
 
-		hash, _ := hex.DecodeString(nodeHash)
-
+		cId := cfg.MainChainId
+		aId := cfg.MainAssetsId
 		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
 			fmt.Println("Failed!")
 			return
 		}
-		tx.TxType = txprotocal.TX_TYPE_STOP_AGENT
+		tx.TxType = txprotocal.REDUCE_AGENT_DEPOSIT
 
-		nonceList := utils.GetReduceNonceList(nodeHash, big.NewInt(1000000000000000000))
+		dec := decimal.NewFromFloat(amount)
+		dec = dec.Mul(decimal.New(1, 8))
+		x := dec.BigInt()
+
+		nonceList := utils.GetReduceNonceList(nodeHash, x)
 
 		totalFrom := big.NewInt(0)
 		froms := []txprotocal.CoinFrom{}
@@ -69,8 +66,8 @@ var stopNodeCmd = &cobra.Command{
 			froms = append(froms, txprotocal.CoinFrom{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
-					AssetsChainId: cfg.MainChainId,
-					AssetsId:      cfg.MainAssetsId,
+					AssetsChainId: cId,
+					AssetsId:      aId,
 					Amount:        item.Amount,
 				},
 				Nonce:  item.Nonce,
@@ -78,20 +75,33 @@ var stopNodeCmd = &cobra.Command{
 			})
 		}
 
+		lockAmount := totalFrom.Sub(totalFrom, x)
 		feeAmount := big.NewInt(int64(100000*int(len(froms)/7) + 100000))
 
-		totalFrom.Sub(totalFrom, feeAmount)
+		timeLockAmount := big.NewInt(0).Add(big.NewInt(0), x)
+		timeLockAmount.Sub(timeLockAmount, feeAmount)
 
 		tos := []txprotocal.CoinTo{
 			{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
-					AssetsChainId: cfg.MainChainId,
-					AssetsId:      cfg.MainAssetsId,
-					Amount:        totalFrom,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        timeLockAmount,
 				},
 				LockValue: uint64(tx.Time + uint32(15*24*3600)),
 			},
+		}
+		if lockAmount.Cmp(big.NewInt(0)) > 0 {
+			tos = append(tos, txprotocal.CoinTo{
+				Coin: txprotocal.Coin{
+					Address:       msAccount.AddressBytes,
+					AssetsChainId: cId,
+					AssetsId:      aId,
+					Amount:        lockAmount,
+				},
+				LockValue: cfg.POCLockValue,
+			})
 		}
 
 		coinData := &txprotocal.CoinData{
@@ -99,18 +109,16 @@ var stopNodeCmd = &cobra.Command{
 			Tos:   tos,
 		}
 		tx.CoinData, _ = coinData.Serialize()
-
-		txData := txdata.StopNode{
-			Address:   msAccount.AddressBytes,
-			AgentHash: txprotocal.NewNulsHash(hash),
+		depositData := txdata.ChangeNodeDeposit{
+			Amount:   x,
+			Address:  msAccount.AddressBytes,
+			NodeHash: txprotocal.ImportNulsHash(nodeHash),
 		}
-		tx.Extend, err = txData.Serialize()
-
+		tx.Extend, err = depositData.Serialize()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
-
 		txBytes, err := tx.Serialize()
 		if err != nil {
 			fmt.Println(err.Error())
@@ -120,17 +128,18 @@ var stopNodeCmd = &cobra.Command{
 
 		fmt.Println("Successed:\ntxHex : " + txHex)
 		fmt.Println("txHash : " + tx.GetHash().String())
-
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(stopNodeCmd)
-	stopNodeCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
-	stopNodeCmd.MarkFlagRequired("m")
-	stopNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
-	stopNodeCmd.MarkFlagRequired("publickeys")
-	stopNodeCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
-	stopNodeCmd.MarkFlagRequired("nodeHash")
+	rootCmd.AddCommand(reduceCmd)
+	reduceCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	reduceCmd.MarkFlagRequired("m")
+	reduceCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	reduceCmd.MarkFlagRequired("publickeys")
+	reduceCmd.Flags().Float64VarP(&amount, "amount", "a", 0, "委托金额")
+	reduceCmd.MarkFlagRequired("amount")
+	reduceCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
+	reduceCmd.MarkFlagRequired("nodeHash")
 
 }

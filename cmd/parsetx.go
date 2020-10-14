@@ -29,6 +29,8 @@ var TypeMap = map[uint16]string{
 	txprotocal.TX_TYPE_CANCEL_DEPOSIT: "退出Staking",
 	txprotocal.TX_TYPE_STOP_AGENT:     "停止节点",
 	txprotocal.TX_TYPE_REGISTER_AGENT: "创建节点",
+	txprotocal.APPEND_AGENT_DEPOSIT:   "追加保证金",
+	txprotocal.REDUCE_AGENT_DEPOSIT:   "退出保证金",
 }
 
 func (ti *TxInfo) String() string {
@@ -100,6 +102,18 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
 		txData["address"] = sdk.GetStringAddress(info.Address)
 		txData["alias"] = info.Alias
+	case txprotocal.APPEND_AGENT_DEPOSIT:
+		info := &txdata.ChangeNodeDeposit{}
+		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
+		txData["address"] = sdk.GetStringAddress(info.Address)
+		txData["nodeHash"] = info.NodeHash.String()
+		txData["amount"] = fmt.Sprintf("%d", info.Amount.Uint64()/100000000)
+	case txprotocal.REDUCE_AGENT_DEPOSIT:
+		info := &txdata.ChangeNodeDeposit{}
+		info.Parse(seria.NewByteBufReader(tx.Extend, 0))
+		txData["address"] = sdk.GetStringAddress(info.Address)
+		txData["nodeHash"] = info.NodeHash.String()
+		txData["amount"] = fmt.Sprintf("%d", info.Amount.Uint64()/100000000)
 	default:
 		if tx.Extend != nil {
 			txData["hex"] = hex.EncodeToString(tx.Extend)
