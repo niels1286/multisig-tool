@@ -22,7 +22,6 @@ import (
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
-	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"math/big"
 	"strings"
@@ -51,21 +50,17 @@ var stopNodeCmd = &cobra.Command{
 			fmt.Println("网络超时导致操作失败，请重试")
 			return
 		}
+
+		hash, _ := hex.DecodeString(nodeHash)
+
 		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
 			fmt.Println("Failed!")
 			return
 		}
-		tx.TxType = txprotocal.APPEND_AGENT_DEPOSIT
+		tx.TxType = txprotocal.TX_TYPE_STOP_AGENT
 
-		dec := decimal.NewFromFloat(amount)
-		dec = dec.Mul(decimal.New(1, 8))
-		x := dec.BigInt()
-
-		cId := cfg.MainChainId
-		aId := cfg.MainAssetsId
-
-		nonceList := utils.GetReduceNonceList(nodeHash, x)
+		nonceList := utils.GetReduceNonceList(nodeHash, big.NewInt(1000000000000000000))
 
 		totalFrom := big.NewInt(0)
 		froms := []txprotocal.CoinFrom{}
@@ -74,8 +69,8 @@ var stopNodeCmd = &cobra.Command{
 			froms = append(froms, txprotocal.CoinFrom{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
-					AssetsChainId: cId,
-					AssetsId:      aId,
+					AssetsChainId: cfg.MainChainId,
+					AssetsId:      cfg.MainAssetsId,
 					Amount:        item.Amount,
 				},
 				Nonce:  item.Nonce,
@@ -83,13 +78,17 @@ var stopNodeCmd = &cobra.Command{
 			})
 		}
 
+		feeAmount := big.NewInt(int64(100000*int(len(froms)/7) + 100000))
+
+		totalFrom.Sub(totalFrom, feeAmount)
+
 		tos := []txprotocal.CoinTo{
 			{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
-					AssetsChainId: cId,
-					AssetsId:      aId,
-					Amount:        totalFrom.Sub(totalFrom, big.NewInt(100000)),
+					AssetsChainId: cfg.MainChainId,
+					AssetsId:      cfg.MainAssetsId,
+					Amount:        totalFrom,
 				},
 				LockValue: uint64(tx.Time + uint32(15*24*3600)),
 			},
@@ -100,7 +99,7 @@ var stopNodeCmd = &cobra.Command{
 			Tos:   tos,
 		}
 		tx.CoinData, _ = coinData.Serialize()
-		hash, _ := hex.DecodeString(nodeHash)
+
 		txData := txdata.StopNode{
 			Address:   msAccount.AddressBytes,
 			AgentHash: txprotocal.NewNulsHash(hash),
