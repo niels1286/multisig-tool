@@ -51,7 +51,7 @@ var reduceCmd = &cobra.Command{
 			fmt.Println("Failed!")
 			return
 		}
-		tx.TxType = txprotocal.APPEND_AGENT_DEPOSIT
+		tx.TxType = txprotocal.REDUCE_AGENT_DEPOSIT
 
 		dec := decimal.NewFromFloat(amount)
 		dec = dec.Mul(decimal.New(1, 8))
@@ -75,24 +75,30 @@ var reduceCmd = &cobra.Command{
 			})
 		}
 
+		lockAmount := totalFrom.Sub(totalFrom, x)
+		feeAmount := big.NewInt(int64(100000*int(len(froms)/7) + 100000))
+
+		timeLockAmount := big.NewInt(0).Add(big.NewInt(0), x)
+		timeLockAmount.Sub(timeLockAmount, feeAmount)
+
 		tos := []txprotocal.CoinTo{
 			{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
 					AssetsChainId: cId,
 					AssetsId:      aId,
-					Amount:        x.Sub(x, big.NewInt(100000)),
+					Amount:        timeLockAmount,
 				},
 				LockValue: uint64(tx.Time + uint32(15*24*3600)),
 			},
 		}
-		if totalFrom.Cmp(x) > 0 {
+		if lockAmount.Cmp(big.NewInt(0)) > 0 {
 			tos = append(tos, txprotocal.CoinTo{
 				Coin: txprotocal.Coin{
 					Address:       msAccount.AddressBytes,
 					AssetsChainId: cId,
 					AssetsId:      aId,
-					Amount:        totalFrom.Sub(totalFrom, x),
+					Amount:        lockAmount,
 				},
 				LockValue: cfg.POCLockValue,
 			})

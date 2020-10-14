@@ -29,6 +29,8 @@ var TypeMap = map[uint16]string{
 	txprotocal.TX_TYPE_CANCEL_DEPOSIT: "退出Staking",
 	txprotocal.TX_TYPE_STOP_AGENT:     "停止节点",
 	txprotocal.TX_TYPE_REGISTER_AGENT: "创建节点",
+	txprotocal.APPEND_AGENT_DEPOSIT:   "追加保证金",
+	txprotocal.REDUCE_AGENT_DEPOSIT:   "退出保证金",
 }
 
 func (ti *TxInfo) String() string {

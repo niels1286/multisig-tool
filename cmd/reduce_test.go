@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestRedice(t *testing.T) {
+func TestReduce(t *testing.T) {
 	aph := "3e73f764492e95362cf325bd7168d145110a75e447510c927612586c06b23e91"
 	bph := "6d10f3aa23018de6bc7d1ee52badd696f0db56082c62826ba822978fdf3a59fa"
 	cph := "f7bb391ab82ba9ec7a552955b2fe50d79eea085d7571e5e2480d1777bc171f5e"

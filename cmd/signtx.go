@@ -97,14 +97,17 @@ var signtxCmd = &cobra.Command{
 			hash, err := sdk.Broadcast(txHex)
 			if err != nil {
 				fmt.Println(err.Error())
+				fmt.Println("Failed!\nNewTxHex:", txHex)
 				return
 			} else {
 				fmt.Println("Broadcast Success!\ntx hash : " + hash)
 				return
 			}
+
+			fmt.Println("Success!\nNewTxHex:", txHex)
+			return
 		}
 		resultHex := hex.EncodeToString(resultBytes)
-
 		fmt.Println("Success!\nNewTxHex:", resultHex)
 	},
 }
