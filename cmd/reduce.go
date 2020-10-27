@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -30,11 +31,11 @@ import (
 
 var reduceCmd = &cobra.Command{
 	Use:   "reduce",
-	Short: "减少",
-	Long:  `减少节点保证金`,
+	Short: i18n.GetText("0007"),
+	Long:  i18n.GetText("0007"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if "" == nodeHash || strings.TrimSpace(nodeHash) == "" {
-			fmt.Println("节点hash不能为空")
+			fmt.Println(i18n.GetText("0017"))
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -48,7 +49,7 @@ var reduceCmd = &cobra.Command{
 		aId := cfg.MainAssetsId
 		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
-			fmt.Println("Failed!")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		tx.TxType = txprotocal.REDUCE_AGENT_DEPOSIT
@@ -133,13 +134,13 @@ var reduceCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(reduceCmd)
-	reduceCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	reduceCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
 	reduceCmd.MarkFlagRequired("m")
-	reduceCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	reduceCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	reduceCmd.MarkFlagRequired("publickeys")
-	reduceCmd.Flags().Float64VarP(&amount, "amount", "a", 0, "委托金额")
+	reduceCmd.Flags().Float64VarP(&amount, "amount", "a", 0, i18n.GetText("0019"))
 	reduceCmd.MarkFlagRequired("amount")
-	reduceCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
+	reduceCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", i18n.GetText("0018"))
 	reduceCmd.MarkFlagRequired("nodeHash")
 
 }

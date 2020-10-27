@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -33,11 +34,11 @@ var rewardAddress string
 // createNodeCmd represents the createNode command
 var createNodeCmd = &cobra.Command{
 	Use:   "createNode",
-	Short: "创建节点",
-	Long:  `创建共识节点，参与网络维护`,
+	Short: i18n.GetText("0004"),
+	Long:  i18n.GetText("0021"),
 	Run: func(cmd *cobra.Command, args []string) {
-		if amount < 2000 || amount > 100000000 {
-			fmt.Println("保证金金额不正确")
+		if amount < 200000 || amount > 100000000 {
+			fmt.Println(i18n.GetText("0022"))
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -47,16 +48,16 @@ var createNodeCmd = &cobra.Command{
 			return
 		}
 		if packingAddress == msAccount.Address {
-			fmt.Println("打包地址不能和创建地址一致")
+			fmt.Println(i18n.GetText("0023"))
 			return
 		}
 		if packingAddress == rewardAddress {
-			fmt.Println("打包地址不能和奖励地址一致")
+			fmt.Println(i18n.GetText("0024"))
 			return
 		}
 		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, amount, "", msAccount.Address, 0, cfg.POCLockValue, nil, false)
 		if tx == nil {
-			fmt.Println("Failed!")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		tx.TxType = txprotocal.TX_TYPE_REGISTER_AGENT
@@ -99,16 +100,16 @@ var createNodeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(createNodeCmd)
 
-	createNodeCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	createNodeCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
 	createNodeCmd.MarkFlagRequired("m")
-	createNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	createNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	createNodeCmd.MarkFlagRequired("publickeys")
 
-	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", "节点打包地址，该地址必须放在节点钱包中")
+	createNodeCmd.Flags().StringVarP(&packingAddress, "packingAddress", "k", "", i18n.GetText("0025"))
 	createNodeCmd.MarkFlagRequired("packingAddress")
 
-	createNodeCmd.Flags().StringVarP(&rewardAddress, "rewardAddress", "r", "", "奖励地址，不填则默认为创建地址")
+	createNodeCmd.Flags().StringVarP(&rewardAddress, "rewardAddress", "r", "", i18n.GetText("0026"))
 
-	createNodeCmd.Flags().Float64VarP(&amount, "amount", "a", 0, "委托金额")
+	createNodeCmd.Flags().Float64VarP(&amount, "amount", "a", 0, i18n.GetText("0019"))
 	createNodeCmd.MarkFlagRequired("amount")
 }

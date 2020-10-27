@@ -15,8 +15,21 @@ limitations under the License.
 */
 package main
 
-import "github.com/niels1286/multisig-tool/cmd"
+import (
+	"github.com/niels1286/multisig-tool/cmd"
+	"github.com/niels1286/multisig-tool/i18n"
+	"time"
+)
 
 func main() {
+	i18n.InitLang(getLangType())
 	cmd.Execute()
+}
+
+func getLangType() string {
+	zone, offset := time.Now().Local().Zone()
+	if zone == "CST" && offset == 28800 {
+		return "cn"
+	}
+	return "en"
 }

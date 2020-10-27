@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	"github.com/niels1286/nerve-go-sdk/acc"
 	cryptoutils "github.com/niels1286/nerve-go-sdk/crypto/utils"
@@ -22,15 +23,15 @@ var prikeyHex string
 // signtxCmd represents the signtx command
 var signtxCmd = &cobra.Command{
 	Use:   "signtx",
-	Short: "sign a transaction",
-	Long:  `对多签交易进行签名，当签名数量足够时，自动将交易广播到网络中`,
+	Short: i18n.GetText("0008"),
+	Long:  i18n.GetText("0036"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if "" == txHex {
-			fmt.Println("txHex is valid.")
+			fmt.Println(i18n.GetText("0032"))
 			return
 		}
 		if "" == prikeyHex && (keystore == "" || "" == password) {
-			fmt.Println("need prikey")
+			fmt.Println(i18n.GetText("0037"))
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -38,12 +39,12 @@ var signtxCmd = &cobra.Command{
 		nulsAccount, err := getAccount(sdk)
 
 		if err != nil {
-			fmt.Println("account wrong.")
+			fmt.Println(i18n.GetText("0038"))
 			return
 		}
 		txBytes, err := hex.DecodeString(txHex)
 		if err != nil {
-			fmt.Println("txhex wrong.")
+			fmt.Println(i18n.GetText("0032"))
 			return
 		}
 		tx := txprotocal.ParseTransactionByReader(seria.NewByteBufReader(txBytes, 0))
@@ -61,18 +62,18 @@ var signtxCmd = &cobra.Command{
 			}
 		}
 		if !ok {
-			fmt.Println("The address is not necessary")
+			fmt.Println(i18n.GetText("0039"))
 			return
 		}
 		//签名
 		hash, err := tx.GetHash().Serialize()
 		if err != nil {
-			fmt.Println("txhex wrong.")
+			fmt.Println(i18n.GetText("0032"))
 			return
 		}
 		signData, err := sdk.AccountSDK.Sign(nulsAccount, hash)
 		if err != nil {
-			fmt.Println("sign failed.")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		sign := txprotocal.P2PHKSignature{
@@ -82,12 +83,12 @@ var signtxCmd = &cobra.Command{
 		txSign.Signatures = append(txSign.Signatures, sign)
 		tx.SignData, err = txSign.Serialize()
 		if err != nil {
-			fmt.Println("sign failed.")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		resultBytes, err := tx.Serialize()
 		if err != nil {
-			fmt.Println("sign failed.")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		////判断是否需要广播
@@ -100,7 +101,7 @@ var signtxCmd = &cobra.Command{
 				fmt.Println("Failed!\nNewTxHex:", txHex)
 				return
 			} else {
-				fmt.Println("Broadcast Success!\ntx hash : " + hash)
+				fmt.Println(i18n.GetText("10000") + "!\ntx hash : " + hash)
 				return
 			}
 
@@ -133,14 +134,14 @@ func getAccount(sdk *nerve.NerveSDK) (acc.Account, error) {
 
 func init() {
 	rootCmd.AddCommand(signtxCmd)
-	signtxCmd.Flags().StringVarP(&txHex, "txhex", "t", "", "Transaction serialization data in hexadecimal string format")
+	signtxCmd.Flags().StringVarP(&txHex, "txhex", "t", "", i18n.GetText("0033"))
 	signtxCmd.MarkFlagRequired("txhex")
 
-	signtxCmd.Flags().StringVarP(&prikeyHex, "prikey", "p", "", "签名使用的私钥，程序将自动验证其是否属于多签成员")
+	signtxCmd.Flags().StringVarP(&prikeyHex, "prikey", "p", "", i18n.GetText("0048"))
 
-	signtxCmd.PersistentFlags().StringVarP(&keystore, "keystore", "k", "", "当不是用prikey时，可以指定同目录的keystore文件名")
+	signtxCmd.PersistentFlags().StringVarP(&keystore, "keystore", "k", "", i18n.GetText("0049"))
 
-	signtxCmd.Flags().StringVarP(&password, "password", "w", "", "使用keystore时，需要使用密码")
+	signtxCmd.Flags().StringVarP(&password, "password", "w", "", i18n.GetText("0050"))
 
 }
 
@@ -158,7 +159,7 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 	if err == nil {
-		fmt.Println("Using Account from:", viper.ConfigFileUsed())
+		fmt.Println(i18n.GetText("0051")+":", viper.ConfigFileUsed())
 	} else {
 		fmt.Println(err.Error())
 	}

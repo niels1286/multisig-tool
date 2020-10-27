@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -9,8 +10,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nmt",
-	Short: "NULS MultiAddress Tools",
-	Long:  `NULS多签工具基本款，包含账户创建和转账签名功能`,
+	Short: i18n.GetText("0034"),
+	Long:  i18n.GetText("0035"),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

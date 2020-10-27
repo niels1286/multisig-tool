@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -15,10 +16,9 @@ var alias string
 // aliasCmd represents the alias command
 var aliasCmd = &cobra.Command{
 	Use:   "alias",
-	Short: "set alias",
-	Long:  `Set alias for quick transfer and node name display`,
+	Short: i18n.GetText("0001"),
+	Long:  i18n.GetText("0013"),
 	Run: func(cmd *cobra.Command, args []string) {
-		//todo 验证别名格式及是否重复
 
 		amount = 1
 		to = cfg.BlackHoleAddress
@@ -53,10 +53,10 @@ var aliasCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(aliasCmd)
-	aliasCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
-	aliasCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	aliasCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
+	aliasCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	aliasCmd.MarkFlagRequired("m")
 	aliasCmd.MarkFlagRequired("publickeys")
-	aliasCmd.Flags().StringVarP(&alias, "alias", "a", "", "别名，只允许小写字母和下划线")
+	aliasCmd.Flags().StringVarP(&alias, "alias", "a", "", i18n.GetText("0016"))
 	aliasCmd.MarkFlagRequired("alias")
 }

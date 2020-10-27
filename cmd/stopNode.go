@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -32,11 +33,11 @@ var nodeHash string
 // stopNodeCmd represents the stopNode command
 var stopNodeCmd = &cobra.Command{
 	Use:   "stopNode",
-	Short: "注销节点",
-	Long:  `注销节点，不再参与网络维护，不再得到奖励`,
+	Short: i18n.GetText("0010"),
+	Long:  i18n.GetText("0055"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if "" == strings.TrimSpace(nodeHash) {
-			fmt.Println("agent hash 不能为空")
+			fmt.Println(i18n.GetText("0056"))
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -47,7 +48,7 @@ var stopNodeCmd = &cobra.Command{
 		}
 		node, err := sdk.GetNode(cfg.PsUrl, nodeHash)
 		if node == nil || err != nil {
-			fmt.Println("网络超时导致操作失败，请重试")
+			fmt.Println(i18n.GetText("0057"))
 			return
 		}
 
@@ -55,7 +56,7 @@ var stopNodeCmd = &cobra.Command{
 
 		tx := utils.AssembleTransferTxForReduce(m, pks, "")
 		if tx == nil {
-			fmt.Println("Failed!")
+			fmt.Println(i18n.GetText("10000"))
 			return
 		}
 		tx.TxType = txprotocal.TX_TYPE_STOP_AGENT
@@ -126,11 +127,11 @@ var stopNodeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(stopNodeCmd)
-	stopNodeCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	stopNodeCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
 	stopNodeCmd.MarkFlagRequired("m")
-	stopNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	stopNodeCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	stopNodeCmd.MarkFlagRequired("publickeys")
-	stopNodeCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
+	stopNodeCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", i18n.GetText("0018"))
 	stopNodeCmd.MarkFlagRequired("nodeHash")
 
 }

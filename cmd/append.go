@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -15,11 +16,11 @@ import (
 // appendCmd represents the deposit command
 var appendCmd = &cobra.Command{
 	Use:   "append",
-	Short: "追加",
-	Long:  `节点追加保证金`,
+	Short: i18n.GetText("0002"),
+	Long:  i18n.GetText("0002"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if "" == nodeHash || strings.TrimSpace(nodeHash) == "" {
-			fmt.Println("节点hash不能为空")
+			fmt.Println(i18n.GetText("0017"))
 			return
 		}
 		sdk := utils.GetOfficalSdk()
@@ -33,7 +34,7 @@ var appendCmd = &cobra.Command{
 		aId := cfg.MainAssetsId
 		tx := utils.AssembleTransferTx(m, pks, cId, aId, amount, "", msAccount.Address, 0, cfg.POCLockValue, nil, true)
 		if tx == nil {
-			fmt.Println("Failed!")
+			fmt.Println(i18n.GetText("10001"))
 			return
 		}
 		tx.TxType = txprotocal.APPEND_AGENT_DEPOSIT
@@ -65,12 +66,12 @@ var appendCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(appendCmd)
-	appendCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	appendCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
 	appendCmd.MarkFlagRequired("m")
-	appendCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	appendCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	appendCmd.MarkFlagRequired("publickeys")
-	appendCmd.Flags().Float64VarP(&amount, "amount", "a", 0, "委托金额")
+	appendCmd.Flags().Float64VarP(&amount, "amount", "a", 0, i18n.GetText("0019"))
 	appendCmd.MarkFlagRequired("amount")
-	appendCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", "节点hash")
+	appendCmd.Flags().StringVarP(&nodeHash, "nodeHash", "n", "", i18n.GetText("0018"))
 	appendCmd.MarkFlagRequired("nodeHash")
 }

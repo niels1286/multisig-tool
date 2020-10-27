@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -22,15 +23,15 @@ type TxInfo struct {
 }
 
 var TypeMap = map[uint16]string{
-	1:                                 "共识奖励",
-	2:                                 "转账交易",
-	5:                                 "质押交易",
-	txprotocal.TX_TYPE_ACCOUNT_ALIAS:  "设置别名",
-	txprotocal.TX_TYPE_CANCEL_DEPOSIT: "退出Staking",
-	txprotocal.TX_TYPE_STOP_AGENT:     "停止节点",
-	txprotocal.TX_TYPE_REGISTER_AGENT: "创建节点",
-	txprotocal.APPEND_AGENT_DEPOSIT:   "追加保证金",
-	txprotocal.REDUCE_AGENT_DEPOSIT:   "退出保证金",
+	1:                                 i18n.GetText("0027"),
+	2:                                 i18n.GetText("0028"),
+	5:                                 i18n.GetText("0029"),
+	txprotocal.TX_TYPE_ACCOUNT_ALIAS:  i18n.GetText("0001"),
+	txprotocal.TX_TYPE_CANCEL_DEPOSIT: i18n.GetText("0012"),
+	txprotocal.TX_TYPE_STOP_AGENT:     i18n.GetText("0010"),
+	txprotocal.TX_TYPE_REGISTER_AGENT: i18n.GetText("0004"),
+	txprotocal.APPEND_AGENT_DEPOSIT:   i18n.GetText("0002"),
+	txprotocal.REDUCE_AGENT_DEPOSIT:   i18n.GetText("0007"),
 }
 
 func (ti *TxInfo) String() string {
@@ -45,11 +46,11 @@ func (ti *TxInfo) String() string {
 // parsetxCmd represents the parsetx command
 var parsetxCmd = &cobra.Command{
 	Use:   "parsetx",
-	Short: "Deserialize transactions to readable content",
-	Long:  `Deserialize the transaction into readable content. Mainly focus on transaction type, coindata content and txdata content.`,
+	Short: i18n.GetText("0030"),
+	Long:  i18n.GetText("0031"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if "" == txHex {
-			fmt.Println("txHex is valid.")
+			fmt.Println(i18n.GetText("0032"))
 			return
 		}
 		txBytes, err := hex.DecodeString(txHex)
@@ -63,7 +64,7 @@ var parsetxCmd = &cobra.Command{
 		fmt.Println(info.String())
 	},
 }
-var timeStrArr = []string{"3月", "半年", "一年", "两年", "三年", "五年", "十年"}
+var timeStrArr = []string{i18n.GetText("0040"), i18n.GetText("0041"), i18n.GetText("0042"), i18n.GetText("0043"), i18n.GetText("0044"), i18n.GetText("0045"), i18n.GetText("0046")}
 
 func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 	typeStr := TypeMap[tx.TxType]
@@ -75,7 +76,7 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 		deposit.Parse(seria.NewByteBufReader(tx.Extend, 0))
 		txData["address"] = sdk.GetStringAddress(deposit.Address)
 		txData["amount"] = fmt.Sprintf("%d", deposit.Amount.Uint64()/100000000)
-		timeStr := "活期"
+		timeStr := i18n.GetText("0047")
 		if deposit.DepositType != 0 {
 			timeStr = timeStrArr[deposit.TimeType]
 		}
@@ -146,6 +147,6 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 
 func init() {
 	rootCmd.AddCommand(parsetxCmd)
-	parsetxCmd.Flags().StringVarP(&txHex, "txhex", "t", "", "Transaction serialization data in hexadecimal string format")
+	parsetxCmd.Flags().StringVarP(&txHex, "txhex", "t", "", i18n.GetText("0033"))
 	parsetxCmd.MarkFlagRequired("txhex")
 }

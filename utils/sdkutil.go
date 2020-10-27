@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/nerve-go-sdk/multisig"
 	"github.com/niels1286/nerve-go-sdk/nerve"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
@@ -35,7 +36,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 	}
 
 	if m < 1 || m > 15 {
-		fmt.Println("m value valid")
+		fmt.Println(i18n.GetText("0020"))
 		return nil
 	}
 	sdk := GetOfficalSdk()
@@ -56,7 +57,7 @@ func AssembleTransferTx(m int, pkArrayHex string, assetsChainId uint16, assetsId
 	for _, pk := range pkArray {
 		bytes, err := hex.DecodeString(pk)
 		if err != nil {
-			fmt.Println("public key not right.")
+			fmt.Println(i18n.GetText("0068"))
 			return nil
 		}
 		publicKeys = append(publicKeys, bytes)
@@ -87,7 +88,7 @@ func AssembleTransferTxForReduce(m int, pkArrayHex string, remark string) *txpro
 	}
 
 	if m < 1 || m > 15 {
-		fmt.Println("m value valid")
+		fmt.Println(i18n.GetText("0020"))
 		return nil
 	}
 	sdk := GetOfficalSdk()
@@ -106,7 +107,7 @@ func AssembleTransferTxForReduce(m int, pkArrayHex string, remark string) *txpro
 	for _, pk := range pkArray {
 		bytes, err := hex.DecodeString(pk)
 		if err != nil {
-			fmt.Println("public key not right.")
+			fmt.Println(i18n.GetText("0068"))
 			return nil
 		}
 		publicKeys = append(publicKeys, bytes)
@@ -129,7 +130,7 @@ func fillCoinData(sdk *nerve.NerveSDK, msAccount *multisig.MultiAccount, fromLoc
 	value := decimal.NewFromFloat(amount)
 	scale := cfg.AssetsMap[fmt.Sprintf("%d", assetsChainId)+"-"+fmt.Sprintf("%d", assetsId)]
 	if scale == 0 {
-		fmt.Println("未能获取到该资产的小数位数")
+		fmt.Println(i18n.GetText("0069"))
 		return nil
 	}
 	value = value.Mul(decimal.NewFromFloat(math.Pow10(scale)))

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/niels1286/multisig-tool/cfg"
+	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
@@ -19,8 +20,8 @@ var stakingTxHash string
 // withdrawCmd represents the withdraw command
 var withdrawCmd = &cobra.Command{
 	Use:   "withdraw",
-	Short: "退出委托",
-	Long:  `退出指定一笔委托，立即解锁对应的资产`,
+	Short: i18n.GetText("0012"),
+	Long:  i18n.GetText("0063"),
 	Run: func(cmd *cobra.Command, args []string) {
 		hashBytes, err := hex.DecodeString(stakingTxHash)
 		if err != nil {
@@ -33,7 +34,7 @@ var withdrawCmd = &cobra.Command{
 
 		txJson, err := sdk.GetTxJson(stakingTxHash)
 		if err != nil {
-			fmt.Println("Can't find the deposit transaction.")
+			fmt.Println(i18n.GetText("0064"))
 			return
 		}
 		//fmt.Println(txJson)
@@ -41,12 +42,12 @@ var withdrawCmd = &cobra.Command{
 		json.Unmarshal([]byte(txJson), &txmap)
 		txDataHex := txmap["txDataHex"].(string)
 		if txDataHex == "" {
-			fmt.Println("Failed to parse the deposit transaction.")
+			fmt.Println(i18n.GetText("0065"))
 			return
 		}
 		txDataBytes, err := hex.DecodeString(txDataHex)
 		if err != nil {
-			fmt.Println("Failed to parse the deposit transaction.")
+			fmt.Println(i18n.GetText("0066"))
 			return
 		}
 		depositData := txdata.Staking{}
@@ -91,12 +92,12 @@ var withdrawCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(withdrawCmd)
-	withdrawCmd.Flags().IntVarP(&m, "m", "m", 0, "发起交易的最小签名个数")
+	withdrawCmd.Flags().IntVarP(&m, "m", "m", 0, i18n.GetText("0014"))
 	withdrawCmd.MarkFlagRequired("m")
 
-	withdrawCmd.Flags().StringVarP(&pks, "publickeys", "p", "", "多签地址的成员公钥，以','分隔不同的公钥")
+	withdrawCmd.Flags().StringVarP(&pks, "publickeys", "p", "", i18n.GetText("0015"))
 	withdrawCmd.MarkFlagRequired("publickeys")
 
-	withdrawCmd.Flags().StringVarP(&stakingTxHash, "stakingTxHash", "s", "", "委托交易的交易hash")
+	withdrawCmd.Flags().StringVarP(&stakingTxHash, "stakingTxHash", "s", "", i18n.GetText("0067"))
 	withdrawCmd.MarkFlagRequired("stakingTxHash")
 }
