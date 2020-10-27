@@ -19,7 +19,6 @@ var aliasCmd = &cobra.Command{
 	Short: i18n.GetText("0001"),
 	Long:  i18n.GetText("0013"),
 	Run: func(cmd *cobra.Command, args []string) {
-
 		amount = 1
 		to = cfg.BlackHoleAddress
 		tx := utils.AssembleTransferTx(m, pks, cfg.MainChainId, cfg.MainAssetsId, amount, "", to, 0, 0, nil, false)

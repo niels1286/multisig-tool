@@ -3,6 +3,8 @@
 // @Author  Niels  2020/10/22
 package i18n
 
+import "time"
+
 var currentMap map[string]string
 
 var cnMap = map[string]string{
@@ -81,10 +83,10 @@ var enMap = map[string]string{
 	"0006": "Deserialize transactions to readable content",
 	"0007": "Reduce node margin",
 	"0008": "sign a transaction",
-	"0009": "Income from pledge",
+	"0009": "Income from staking",
 	"0010": "Cancel consensus node",
 	"0011": "Assemble a transfer transaction",
-	"0012": "Exit pledge",
+	"0012": "Exit staking",
 	"0013": "Set alias for quick transfer and node name display",
 	"0014": "minimum number of signatures to initiate a transaction",
 	"0015": "public keys of members with multiple signature addresses, separating different public keys with ','",
@@ -101,7 +103,7 @@ var enMap = map[string]string{
 	"0026": "award address. If it is not filled in, it will be the created address by default.",
 	"0027": "consensus award",
 	"0028": "transfer transactions",
-	"0029": "pledge transaction",
+	"0029": "staking transaction",
 	"0030": "Deserialize transactions to readable content",
 	"0031": `Deserialize the transaction into readable content. Mainly focus on transaction type, coindata content and txdata content.`,
 	"0032": "txHex is valid.",
@@ -118,9 +120,9 @@ var enMap = map[string]string{
 	"0049":  "when prikey is not used, you can specify the keystore file name of the same directory.",
 	"0050":  "when using keystore, you need to use a password",
 	"0051":  "Using Account from",
-	"0052":  "income from pledged assets",
+	"0052":  "income from stakingd assets",
 	"0053":  "asset ID, in the form of chainid assetsid, NVT:9-1 , NULS:1-1 ",
-	"0054":  "pledge time type: 0-current, 1-3 months, 2-6 months, 3-1 years, 4-2 years, 5-3 years, 6-5 years, 7-10 years",
+	"0054":  "staking time type: 0-current, 1-3 months, 2-6 months, 3-1 years, 4-2 years, 5-3 years, 6-5 years, 7-10 years",
 	"0055":  "log off a node, no longer participate in network maintenance, no longer get rewards.",
 	"0056":  "agent hash cannot be empty",
 	"0057":  "the operation failed due to network timeout, please try again",
@@ -131,7 +133,7 @@ var enMap = map[string]string{
 	"0062":  "asset ID, in the form of chainid assetsid, NVT:9-1 , NULS:1-1 ",
 	"0063":  "exit the specified delegation and unlock the corresponding asset immediately",
 	"0064":  "Can't find the deposit transaction.",
-	"0065":  "query pledge transaction resolution failed",
+	"0065":  "query staking transaction resolution failed",
 	"0066":  "Failed to parse the deposit transaction.",
 	"0067":  "transaction hash of entrusted transaction",
 	"0068":  "public key not right.",
@@ -140,7 +142,7 @@ var enMap = map[string]string{
 	"10001": "Failed",
 }
 
-func InitLang(key string) {
+func initLang(key string) {
 	switch key {
 	case "cn":
 		currentMap = cnMap
@@ -152,5 +154,17 @@ func InitLang(key string) {
 }
 
 func GetText(code string) string {
+	if len(currentMap) == 0 {
+		initLang(getLangType())
+	}
+
 	return currentMap[code]
+}
+
+func getLangType() string {
+	zone, offset := time.Now().Local().Zone()
+	if zone == "CST" && offset == 28800 {
+		return "cn"
+	}
+	return "en"
 }

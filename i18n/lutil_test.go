@@ -11,4 +11,5 @@ import (
 
 func TestInitLang(t *testing.T) {
 	fmt.Println(time.Now().Local().Zone())
+	fmt.Println(GetText("0012"))
 }
