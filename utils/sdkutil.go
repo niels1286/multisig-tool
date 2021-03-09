@@ -227,7 +227,7 @@ func GetNonce(address string, chainId uint16, assetsId uint16) []byte {
 	sdk := GetOfficalSdk()
 	status, err := sdk.ApiSDK.GetBalance(address, chainId, assetsId)
 	if err != nil {
-		return nil
+		panic(err.Error())
 	}
 	if status == nil {
 		return []byte{0, 0, 0, 0, 0, 0, 0, 0}
