@@ -21,4 +21,4 @@ const BlackHoleAddress = "NERVEepb63T1M8JgQ26jwZpZXYL8ZMLdUAK31L"
 
 const POCLockValue = 18446744073709551615
 
-var AssetsMap = map[string]int{"1-1": 8, "9-1": 8, "9-2": 18, "9-3": 6, "9-5": 6, "9-6": 18, "9-7": 18}
+var AssetsMap = map[string]int{"1-1": 8, "9-1": 8, "9-2": 18, "9-3": 6, "9-5": 6, "9-6": 18, "9-7": 18, "1-146": 18}
