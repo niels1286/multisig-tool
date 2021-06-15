@@ -7,7 +7,6 @@ import (
 	"github.com/niels1286/multisig-tool/utils"
 	txprotocal "github.com/niels1286/nerve-go-sdk/protocal"
 	"github.com/niels1286/nerve-go-sdk/protocal/txdata"
-	"github.com/niels1286/nerve-go-sdk/utils/mathutils"
 	"github.com/niels1286/nerve-go-sdk/utils/seria"
 	"github.com/spf13/cobra"
 )
@@ -125,7 +124,7 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 	var message = "From:\n"
 	for _, from := range cd.Froms {
 		nonce := hex.EncodeToString(from.Nonce)
-		message += "\t" + sdk.GetStringAddress(from.Address) + "(" + fmt.Sprintf("%d", from.AssetsChainId) + "-" + fmt.Sprintf("%d", from.AssetsId) + ") (" + nonce + "):: " + mathutils.GetStringAmount(from.Amount, 8) + "\n"
+		message += "\t" + sdk.GetStringAddress(from.Address) + "(" + fmt.Sprintf("%d", from.AssetsChainId) + "-" + fmt.Sprintf("%d", from.AssetsId) + ") (" + nonce + "):: " + from.Amount.String() + "\n"
 	}
 	message += "To:\n"
 	for _, to := range cd.Tos {
@@ -133,7 +132,7 @@ func getTxInfo(tx *txprotocal.Transaction) *TxInfo {
 		if to.LockValue == uint64(18446744073709551615) {
 			lock = "-1"
 		}
-		message += "\t" + sdk.GetStringAddress(to.Address) + "(" + fmt.Sprintf("%d", to.AssetsChainId) + "-" + fmt.Sprintf("%d", to.AssetsId) + ") :: " + mathutils.GetStringAmount(to.Amount, 8) + " (lock:" + lock + ")\n"
+		message += "\t" + sdk.GetStringAddress(to.Address) + "(" + fmt.Sprintf("%d", to.AssetsChainId) + "-" + fmt.Sprintf("%d", to.AssetsId) + ") :: " + to.Amount.String() + " (lock:" + lock + ")\n"
 	}
 
 	return &TxInfo{
