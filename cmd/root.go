@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/niels1286/multisig-tool/i18n"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "nmt",
+	Use:   "multisig-tool",
 	Short: i18n.GetText("0034"),
 	Long:  i18n.GetText("0035"),
 }
