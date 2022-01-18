@@ -19,12 +19,19 @@ package cfg
 // const AddressPrefix = "NERVE"
 // const BlackHoleAddress = "NERVEepb63T1M8JgQ26jwZpZXYL8ZMLdUAK31L"
 
-const ApiUrl = "https://api.nuls.io/jsonrpc/"
-const PsUrl = "https://public1.nuls.io/"
-const MainChainId = uint16(1)
+// const ApiUrl = "https://api.nuls.io/jsonrpc/"
+// const PsUrl = "https://public1.nuls.io/"
+// const MainChainId = uint16(1)
+// const MainAssetsId = uint16(1)
+// const AddressPrefix = "NULS"
+// const BlackHoleAddress = "NULSd6HgWSU1iR6BfNoQi85mAMT52JMFzpnok"
+
+const ApiUrl = "http://beta.api.nuls.io/jsonrpc/"
+const PsUrl = "http://beta.public1.nuls.io/"
+const MainChainId = uint16(2)
 const MainAssetsId = uint16(1)
-const AddressPrefix = "NULS"
-const BlackHoleAddress = "NULSd6HgWSU1iR6BfNoQi85mAMT52JMFzpnok"
+const AddressPrefix = "tNULS"
+const BlackHoleAddress = "tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d"
 
 const POCLockValue = 18446744073709551615
 
